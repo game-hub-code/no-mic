@@ -15,65 +15,34 @@
 <canvas id="fluid"></canvas>
 <div id="medusa-container"></div>
 
-<!-- fluid background (unchanged from earlier build) -->
-<script src="https://cdn.jsdelivr.net/npm/webgl-fluid@0.4"></script>
+<!-- fluid background: vendored, verified engine (ported from
+     rocksdanister/WebGL-Fluid-Simulation, lively branch) — not the CDN
+     "webgl-fluid" package, which has no keyboard/programmatic splat API
+     at all and was silently ignoring every audio-triggered call before. -->
+<script src="vendor/webgl-fluid-sim.js"></script>
 <script>
-WebGLFluid(document.getElementById('fluid'), {
-  TRIGGER: 'hover',
-  IMMEDIATE: true,
-  SIM_RESOLUTION: 128,
-  DYE_RESOLUTION: 1024,
+// script.js exposes `config`, `updateKeywords`, and `_audioReact` as plain
+// top-level bindings (not on window, but visible to sibling <script> tags
+// in this same document) — safe to read/override here directly.
+Object.assign(config, {
   DENSITY_DISSIPATION: 1.5,
   VELOCITY_DISSIPATION: 0.9,
   SPLAT_RADIUS: 0.3,
   SPLAT_FORCE: 10000,
   CURL: 25,
-  SHADING: true,
-  COLORFUL: true,
-  COLOR_UPDATE_SPEED: 10,
-  BACK_COLOR: { r: 0, g: 0, b: 0 },
-  TRANSPARENT: false,
-  BLOOM: true,
   BLOOM_INTENSITY: 0.01,
   SUNRAYS: false
 });
+updateKeywords(); // recompile display shader for the SUNRAYS/BLOOM change above
+
+// script.js's own livelyAudioListener silently no-ops unless this is true —
+// normally toggled by a Lively Properties panel checkbox we're not shipping,
+// so it's forced on here instead. This (not the CDN library swap alone) is
+// almost certainly why audio did nothing before: the listener was being
+// called but was gated off internally by default.
+_audioReact = true;
 </script>
-<script>
-// Lively-only audio reactivity. No getUserMedia/microphone access of any
-// kind — if this page is not running inside Lively Wallpaper (i.e. nothing
-// ever calls livelyAudioListener), the fluid simply stays non-audio-reactive
-// and behaves like a normal idle wallpaper.
-(function(){
-  var FREQ_RANGE = 40;    // how many low-frequency (bass) bins to sum
-  var FREQ_MULTI = 0.1;   // normalizes the summed bass value
-  var SENSITIVITY = 0.25; // overall reactivity multiplier
-  var MAX_BURSTS_PER_CALL = 3; // hard cap so loud bass can't flood splats
-  var lastBass = 0;
-
-  window.livelyAudioListener = function(audioArray){
-    if (!audioArray || !audioArray.length) return;
-
-    var bass = 0.0;
-    var range = Math.min(FREQ_RANGE, audioArray.length - 1);
-    for (var i = 0; i <= range; i++) bass += audioArray[i] * 2;
-    bass /= range * 2 * FREQ_MULTI;
-
-    var amount = Math.floor(bass * SENSITIVITY * 10) - lastBass;
-    lastBass = Math.floor(bass * SENSITIVITY * 10);
-
-    if (amount <= 0) return;
-    amount = Math.min(amount, MAX_BURSTS_PER_CALL);
-
-    // The CDN webgl-fluid bundle doesn't expose splat()/multipleSplats()
-    // directly, so we drive its own built-in "space bar = random splat
-    // burst" handler instead — same mechanism the packaged library already
-    // uses for keyboard input.
-    for (var j = 0; j < amount; j++) {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space' }));
-    }
-  };
-})();
-</script><!-- real particulate-medusae port: three.js r72 (pinned to match original) -->
+<!-- real particulate-medusae port: three.js r72 (pinned to match original) -->
 <script src="vendor/three.js"></script>
 <script src="vendor/TrackballControls.js"></script>
 <script src="vendor/EffectComposer.js"></script>
