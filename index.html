@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Fluid Medusae</title>
+<style>
+  html, body { margin:0; padding:0; overflow:hidden; background:#000; width:100vw; height:100vh; }
+  canvas { position:absolute; top:0; left:0; width:100vw; height:100vh; }
+  #fluid { z-index: 1; }
+  #medusa-container { position:absolute; top:0; left:0; width:100vw; height:100vh; z-index: 2; }
+  #medusa-container canvas { position:absolute; top:0; left:0; }
+</style>
+</head>
+<body>
+<canvas id="fluid"></canvas>
+<div id="medusa-container"></div>
+
+<!-- fluid background (unchanged from earlier build) -->
+<script src="https://cdn.jsdelivr.net/npm/webgl-fluid@0.4"></script>
+<script>
+WebGLFluid(document.getElementById('fluid'), {
+  TRIGGER: 'hover',
+  IMMEDIATE: true,
+  SIM_RESOLUTION: 128,
+  DYE_RESOLUTION: 1024,
+  DENSITY_DISSIPATION: 1.5,
+  VELOCITY_DISSIPATION: 0.9,
+  SPLAT_RADIUS: 0.3,
+  SPLAT_FORCE: 10000,
+  CURL: 25,
+  SHADING: true,
+  COLORFUL: true,
+  COLOR_UPDATE_SPEED: 10,
+  BACK_COLOR: { r: 0, g: 0, b: 0 },
+  TRANSPARENT: false,
+  BLOOM: true,
+  BLOOM_INTENSITY: 0.01,
+  SUNRAYS: false
+});
+</script>
+<script>
+// Lively-only audio reactivity. No getUserMedia/microphone access of any
+// kind — if this page is not running inside Lively Wallpaper (i.e. nothing
+// ever calls livelyAudioListener), the fluid simply stays non-audio-reactive
+// and behaves like a normal idle wallpaper.
+(function(){
+  var FREQ_RANGE = 40;    // how many low-frequency (bass) bins to sum
+  var FREQ_MULTI = 0.1;   // normalizes the summed bass value
+  var SENSITIVITY = 0.25; // overall reactivity multiplier
+  var MAX_BURSTS_PER_CALL = 3; // hard cap so loud bass can't flood splats
+  var lastBass = 0;
+
+  window.livelyAudioListener = function(audioArray){
+    if (!audioArray || !audioArray.length) return;
+
+    var bass = 0.0;
+    var range = Math.min(FREQ_RANGE, audioArray.length - 1);
+    for (var i = 0; i <= range; i++) bass += audioArray[i] * 2;
+    bass /= range * 2 * FREQ_MULTI;
+
+    var amount = Math.floor(bass * SENSITIVITY * 10) - lastBass;
+    lastBass = Math.floor(bass * SENSITIVITY * 10);
+
+    if (amount <= 0) return;
+    amount = Math.min(amount, MAX_BURSTS_PER_CALL);
+
+    // The CDN webgl-fluid bundle doesn't expose splat()/multipleSplats()
+    // directly, so we drive its own built-in "space bar = random splat
+    // burst" handler instead — same mechanism the packaged library already
+    // uses for keyboard input.
+    for (var j = 0; j < amount; j++) {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space' }));
+    }
+  };
+})();
+</script><!-- real particulate-medusae port: three.js r72 (pinned to match original) -->
+<script src="vendor/three.js"></script>
+<script src="vendor/TrackballControls.js"></script>
+<script src="vendor/EffectComposer.js"></script>
+<script src="vendor/RenderPass.js"></script>
+<script src="vendor/ShaderPass.js"></script>
+<script src="vendor/MaskPass.js"></script>
+<script src="vendor/BloomPass.js"></script>
+<script src="vendor/CopyShader.js"></script>
+<script src="vendor/ConvolutionShader.js"></script>
+<script src="vendor/VignetteShader.js"></script>
+
+<!-- particulate (soft-body physics engine, MIT, jpweeks/particulate on npm) -->
+<script src="vendor/particulate.js"></script>
+<!-- noisejs (josephg/noisejs, pinned commit, for lens-dirt texture) -->
+<script src="vendor/noise.js"></script>
+
+<!-- ported app code (verbatim from particulate-medusae unless noted in-file) -->
+<script src="vendor/medusa-app-core.js"></script>
+<script src="vendor/medusa-shaders.js"></script>
+<script src="vendor/medusa-parts.js"></script>
+<script src="vendor/medusa-item.js"></script>
+<script src="vendor/medusa-scene.js"></script>
+<script src="vendor/medusa-bootstrap.js"></script>
+</body>
+</html>

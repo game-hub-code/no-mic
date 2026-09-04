@@ -1,0 +1,27 @@
+This wallpaper ports code from third-party open-source projects:
+
+1. particulate-medusae by Ash Weeks (jpweeks/milcktoast)
+   https://github.com/milcktoast/particulate-medusae
+   License: Artistic License 2.0 (full text: LICENSE-particulate-medusae.txt)
+   Ported: Medusae.js (soft-body jellyfish), MainScene.js (camera/postfx/
+   forces, adapted - see comments in vendor/medusa-scene.js), materials,
+   shaders, LensDirtPass/Texture, Dust, PointRepulsorForce, App utils.
+
+2. Particulate by Jay Weeks (jpweeks)
+   https://github.com/jpweeks/particulate | npm: particulate@0.3.3
+   License: MIT
+
+3. three.js r72 by mrdoob and contributors
+   https://github.com/mrdoob/three.js (tag r72)
+   License: MIT
+   Includes examples/js extras: TrackballControls, EffectComposer,
+   RenderPass, ShaderPass, MaskPass, BloomPass, CopyShader,
+   ConvolutionShader, VignetteShader.
+
+4. noisejs by Joseph Gentle (josephg)
+   https://github.com/josephg/noisejs (commit 3861daee)
+   License: MIT
+
+5. webgl-fluid (port of PavelDoGreat's WebGL-Fluid-Simulation)
+   https://www.npmjs.com/package/webgl-fluid
+   License: MIT

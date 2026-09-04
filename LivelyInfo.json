@@ -1,0 +1,14 @@
+{
+  "AppVersion": "1.0.0.0",
+  "Title": "Fluid Jellyfish",
+  "Thumbnail": null,
+  "Preview": null,
+  "Desc": "Fluid simulation background with a full soft-body jellyfish (ported from particulate-medusae). Drag to orbit camera, click to nudge the jellyfish.",
+  "Author": "Jarvis",
+  "License": "Includes Artistic License 2.0 code - see THIRD-PARTY-NOTICES.txt",
+  "Contact": null,
+  "Type": 1,
+  "FileName": "index.html",
+  "Arguments": "--audio",
+  "IsAbsolutePath": false
+}
